@@ -27,8 +27,8 @@ export const permissionFields = {
   }),
 };
 
-export type Permission = keyof typeof permissionFields;
+export type PermissionName = keyof typeof permissionFields;
 
-export const permissionsList: Permission[] = Object.keys(
+export const permissionsList: PermissionName[] = Object.keys(
   permissionFields
-) as Permission[];
+) as PermissionName[];

@@ -9,6 +9,11 @@ import { lists } from "./schema";
 import { extendGraphqlSchema } from "./mutations/index";
 import "dotenv/config";
 import { sendPasswordResetEmail } from "./lib/mail";
+import { permissionsList } from "./schema/fields";
+
+//###################################################################
+//###################################################################
+//###################################################################
 
 let sessionSecret = process.env.SESSION_SECRET;
 
@@ -62,7 +67,7 @@ export default auth.withAuth(
         maxAge: sessionMaxAge,
         secret: sessionSecret,
       }),
-      { User: "id name email" }
+      { User: `id name email role { ${permissionsList.join(" ")} }` }
     ),
     server: {
       cors: {

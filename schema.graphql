@@ -19,6 +19,13 @@ input RoleRelateToOneInput {
   disconnectAll: Boolean
 }
 
+input ProductRelateToManyInput {
+  create: [ProductCreateInput]
+  connect: [ProductWhereUniqueInput]
+  disconnect: [ProductWhereUniqueInput]
+  disconnectAll: Boolean
+}
+
 """
  A keystone list
 """
@@ -60,6 +67,22 @@ type User {
     skip: Int
   ): _QueryMeta
   role: Role
+  products(
+    where: ProductWhereInput
+    search: String
+    sortBy: [SortProductsBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): [Product!]!
+  _productsMeta(
+    where: ProductWhereInput
+    search: String
+    sortBy: [SortProductsBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): _QueryMeta
   passwordResetToken_is_set: Boolean
   passwordResetIssuedAt: String
   passwordResetRedeemedAt: String
@@ -145,6 +168,21 @@ input UserWhereInput {
   orders_none: OrderWhereInput
   role: RoleWhereInput
   role_is_null: Boolean
+
+  """
+   condition must be true for all nodes
+  """
+  products_every: ProductWhereInput
+
+  """
+   condition must be true for at least 1 node
+  """
+  products_some: ProductWhereInput
+
+  """
+   condition must be false for all nodes
+  """
+  products_none: ProductWhereInput
   passwordResetToken_is_set: Boolean
   passwordResetIssuedAt: String
   passwordResetIssuedAt_not: String
@@ -188,6 +226,7 @@ input UserUpdateInput {
   cart: CartItemRelateToManyInput
   orders: OrderRelateToManyInput
   role: RoleRelateToOneInput
+  products: ProductRelateToManyInput
   passwordResetToken: String
   passwordResetIssuedAt: String
   passwordResetRedeemedAt: String
@@ -205,6 +244,7 @@ input UserCreateInput {
   cart: CartItemRelateToManyInput
   orders: OrderRelateToManyInput
   role: RoleRelateToOneInput
+  products: ProductRelateToManyInput
   passwordResetToken: String
   passwordResetIssuedAt: String
   passwordResetRedeemedAt: String
@@ -221,6 +261,13 @@ input ProductImageRelateToOneInput {
   disconnectAll: Boolean
 }
 
+input UserRelateToOneInput {
+  create: UserCreateInput
+  connect: UserWhereUniqueInput
+  disconnect: UserWhereUniqueInput
+  disconnectAll: Boolean
+}
+
 """
  A keystone list
 """
@@ -231,6 +278,7 @@ type Product {
   status: String
   price: String
   photo: ProductImage
+  user: User
 }
 
 input ProductWhereInput {
@@ -304,6 +352,8 @@ input ProductWhereInput {
   price_not_in: [String]
   photo: ProductImageWhereInput
   photo_is_null: Boolean
+  user: UserWhereInput
+  user_is_null: Boolean
 }
 
 input ProductWhereUniqueInput {
@@ -329,6 +379,7 @@ input ProductUpdateInput {
   status: String
   price: String
   photo: ProductImageRelateToOneInput
+  user: UserRelateToOneInput
 }
 
 input ProductsUpdateInput {
@@ -342,6 +393,7 @@ input ProductCreateInput {
   status: String
   price: String
   photo: ProductImageRelateToOneInput
+  user: UserRelateToOneInput
 }
 
 input ProductsCreateInput {
@@ -482,13 +534,6 @@ input ProductImageCreateInput {
 
 input ProductImagesCreateInput {
   data: ProductImageCreateInput
-}
-
-input UserRelateToOneInput {
-  create: UserCreateInput
-  connect: UserWhereUniqueInput
-  disconnect: UserWhereUniqueInput
-  disconnectAll: Boolean
 }
 
 """

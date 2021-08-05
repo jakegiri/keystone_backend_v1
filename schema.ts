@@ -9,6 +9,7 @@ import {
 import { cloudinaryImage } from "@keystone-next/cloudinary";
 import "dotenv/config";
 import { permissionFields } from "./schema/fields";
+import { isSignedIn } from "./access";
 
 export const lists = createSchema({
   User: list({
@@ -31,9 +32,19 @@ export const lists = createSchema({
       }),
       orders: relationship({ ref: "Order.user", many: true }),
       role: relationship({ ref: "Role.assignedTo" }),
+      products: relationship({
+        ref: "Product.user",
+        many: true,
+      }),
     },
   }),
   Product: list({
+    access: {
+      create: isSignedIn,
+      read: isSignedIn,
+      // delete: rules.canManageProducts,
+      // update: rules.canManageProducts,
+    },
     fields: {
       name: text({ isRequired: true }),
       description: text({
@@ -63,6 +74,12 @@ export const lists = createSchema({
           inlineEdit: { fields: ["image", "altText"] },
         },
       }),
+      user: relationship({
+        ref: "User.products",
+        defaultValue: ({ context }) => ({
+          connect: { id: context.session.itemId },
+        }),
+      }),
     },
     // hooks: {
     //   beforeDelete: async ({ existingItem, context }) => {
@@ -74,9 +91,9 @@ export const lists = createSchema({
     fields: {
       image: cloudinaryImage({
         cloudinary: {
-          cloudName: process.env.CLOUDINARY_CLOUD_NAME,
-          apiKey: process.env.CLOUDINARY_API_KEY,
-          apiSecret: process.env.CLOUDINARY_API_SECRET,
+          cloudName: process.env.CLOUDINARY_CLOUD_NAME!,
+          apiKey: process.env.CLOUDINARY_API_KEY!,
+          apiSecret: process.env.CLOUDINARY_API_SECRET!,
           folder: "sickfits",
         },
       }),
@@ -131,7 +148,12 @@ export const lists = createSchema({
       total: integer(),
       charge: text(),
       items: relationship({ ref: "OrderItem.order", many: true }),
-      user: relationship({ ref: "User.orders" }),
+      user: relationship({
+        ref: "User.orders",
+        ui: {
+          itemView: { fieldMode: "read" },
+        },
+      }),
     },
   }),
   Role: list({
