@@ -9,7 +9,7 @@ import {
 import { cloudinaryImage } from "@keystone-next/cloudinary";
 import "dotenv/config";
 import { permissionFields } from "./schema/fields";
-import { isSignedIn } from "./access";
+import { accessControls } from "./access";
 
 export const lists = createSchema({
   User: list({
@@ -40,10 +40,10 @@ export const lists = createSchema({
   }),
   Product: list({
     access: {
-      create: isSignedIn,
-      read: isSignedIn,
-      // delete: rules.canManageProducts,
-      // update: rules.canManageProducts,
+      create: accessControls.isSignedIn,
+      read: accessControls.ImperativePermissionRules.canReadProducts,
+      delete: accessControls.ImperativePermissionRules.canManageProducts,
+      update: accessControls.ImperativePermissionRules.canManageProducts,
     },
     fields: {
       name: text({ isRequired: true }),
@@ -107,6 +107,12 @@ export const lists = createSchema({
     },
   }),
   CartItem: list({
+    access: {
+      create: accessControls.isSignedIn,
+      read: accessControls.ImperativePermissionRules.canOrder,
+      update: accessControls.ImperativePermissionRules.canOrder,
+      delete: accessControls.ImperativePermissionRules.canOrder,
+    },
     ui: {
       listView: {
         initialColumns: ["product", "quantity", "user"],
@@ -122,6 +128,12 @@ export const lists = createSchema({
     },
   }),
   OrderItem: list({
+    access: {
+      create: accessControls.isSignedIn,
+      read: accessControls.ImperativePermissionRules.canReadProducts,
+      update: false,
+      delete: false,
+    },
     fields: {
       name: text({ isRequired: true }),
       description: text({
@@ -144,6 +156,12 @@ export const lists = createSchema({
     },
   }),
   Order: list({
+    access: {
+      create: accessControls.isSignedIn,
+      read: accessControls.ImperativePermissionRules.canOrder,
+      update: false,
+      delete: false,
+    },
     fields: {
       total: integer(),
       charge: text(),
@@ -157,15 +175,26 @@ export const lists = createSchema({
     },
   }),
   Role: list({
+    access: {
+      create: accessControls.staticPermissionsRules.canManageRoles,
+      read: accessControls.ImperativePermissionRules.canManageProducts,
+      update: accessControls.ImperativePermissionRules.canManageProducts,
+      delete: accessControls.ImperativePermissionRules.canManageProducts,
+    },
+    ui: {
+      isHidden: ({ session }) =>
+        !accessControls.staticPermissionsRules.canManageRoles({ session }),
+      hideCreate: ({ session }) =>
+        !accessControls.staticPermissionsRules.canManageRoles({ session }),
+      hideDelete: ({ session }) =>
+        !accessControls.staticPermissionsRules.canManageRoles({ session }),
+    },
     fields: {
       name: text({ isRequired: true }),
       ...permissionFields,
       assignedTo: relationship({
         ref: "User.role",
         many: true,
-        ui: {
-          itemView: { fieldMode: "read" },
-        },
       }),
     },
   }),

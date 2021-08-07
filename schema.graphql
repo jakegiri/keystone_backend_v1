@@ -709,20 +709,6 @@ enum SortOrderItemsBy {
   quantity_DESC
 }
 
-input OrderItemUpdateInput {
-  name: String
-  description: String
-  price: Int
-  photo: ProductImageRelateToOneInput
-  quantity: Int
-  order: OrderRelateToOneInput
-}
-
-input OrderItemsUpdateInput {
-  id: ID!
-  data: OrderItemUpdateInput
-}
-
 input OrderItemCreateInput {
   name: String
   description: String
@@ -836,18 +822,6 @@ enum SortOrdersBy {
   total_DESC
   charge_ASC
   charge_DESC
-}
-
-input OrderUpdateInput {
-  total: Int
-  charge: String
-  items: OrderItemRelateToManyInput
-  user: UserRelateToOneInput
-}
-
-input OrdersUpdateInput {
-  id: ID!
-  data: OrderUpdateInput
 }
 
 input OrderCreateInput {
@@ -1154,26 +1128,6 @@ type Mutation {
   createOrderItems(data: [OrderItemsCreateInput]): [OrderItem]
 
   """
-   Update a single OrderItem item by ID.
-  """
-  updateOrderItem(id: ID!, data: OrderItemUpdateInput): OrderItem
-
-  """
-   Update multiple OrderItem items by ID.
-  """
-  updateOrderItems(data: [OrderItemsUpdateInput]): [OrderItem]
-
-  """
-   Delete a single OrderItem item by ID.
-  """
-  deleteOrderItem(id: ID!): OrderItem
-
-  """
-   Delete multiple OrderItem items by ID.
-  """
-  deleteOrderItems(ids: [ID!]): [OrderItem]
-
-  """
    Create a single Order item.
   """
   createOrder(data: OrderCreateInput): Order
@@ -1182,26 +1136,6 @@ type Mutation {
    Create multiple Order items.
   """
   createOrders(data: [OrdersCreateInput]): [Order]
-
-  """
-   Update a single Order item by ID.
-  """
-  updateOrder(id: ID!, data: OrderUpdateInput): Order
-
-  """
-   Update multiple Order items by ID.
-  """
-  updateOrders(data: [OrdersUpdateInput]): [Order]
-
-  """
-   Delete a single Order item by ID.
-  """
-  deleteOrder(id: ID!): Order
-
-  """
-   Delete multiple Order items by ID.
-  """
-  deleteOrders(ids: [ID!]): [Order]
 
   """
    Create a single Role item.

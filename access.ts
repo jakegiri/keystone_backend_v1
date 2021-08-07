@@ -2,42 +2,122 @@ import { permissionsList } from "./schema/fields";
 import { ListAccessArgs, PermissionName } from "./types";
 
 //==============  TYPES =====================
-type StaticPermissions = {
+type GeneratedPermissions = {
   [key in PermissionName]: ({ session }: ListAccessArgs) => boolean;
 };
-
+type StaticPermissions = {
+  [key: string]: ({ session }: ListAccessArgs) => boolean;
+};
 type ImperativePermissions = {
-  [key in PermissionName]: ({ session }: ListAccessArgs) => any;
+  [key: string]: ({ session }: ListAccessArgs) => boolean | {}; //boolean or where filter clause
 };
 
-//===============================================
-//===============================================
-//===============================================
-export function isSignedIn({ session }: ListAccessArgs) {
-  return !!session;
+//##################################################################
+//############## TRIED TO CONVERT IT IN CLASS ######################
+//##################################################################
+//##################################################################
+
+class AccessControls {
+  private _generatedStaticPermissionRules: GeneratedPermissions =
+    Object.fromEntries(
+      permissionsList.map((PermissionName: PermissionName) => [
+        PermissionName,
+        ({ session }) => !!session?.data.role?.[PermissionName],
+      ])
+    ) as GeneratedPermissions;
+
+  isSignedIn = ({ session }: ListAccessArgs) => !!session;
+
+  staticPermissionsRules = {
+    ...this._generatedStaticPermissionRules,
+    //you can add more own static-permission-rules here
+  };
+
+  ImperativePermissionRules = {
+    canManageProducts: ({ session }: ListAccessArgs) => {
+      if (!this.isSignedIn({ session })) {
+        return false;
+      }
+      // 1. Do they have persmission of canManageProducts
+      if (this.staticPermissionsRules.canManageProducts({ session })) {
+        return true;
+      }
+      // 2. If not, do they own this item?
+      return { user: { id: session?.itemId } };
+    },
+    canOrder: ({ session }: ListAccessArgs) => {
+      if (!this.isSignedIn({ session })) {
+        return false;
+      }
+      //1. Do they have persmission of canManageProducts
+      if (this.staticPermissionsRules.canManageRoles({ session })) {
+        return true;
+      }
+      //2. If not, do they own this
+      return { user: { id: session?.itemId } };
+    },
+    canManageOrderItems: ({ session }: ListAccessArgs) => {
+      if (!this.isSignedIn({ session })) {
+        return false;
+      }
+      //1. Do they have permission of canManageProducts
+      if (this.staticPermissionsRules.canManageProducts({ session })) {
+        return true;
+      }
+      //2. If not, do they own the related order of this orderItem?
+      return { order: { user: { id: session?.itemId } } };
+    },
+    canReadProducts: ({ session }: ListAccessArgs) => {
+      if (!this.isSignedIn({ session })) {
+        return false;
+      }
+      //1. Do they have persmission of canManageProducts
+      if (this.staticPermissionsRules.canManageProducts({ session })) {
+        return true;
+      }
+      //2. If not, do they own this item?
+      return { status: "AVAILABLE" };
+    },
+  };
 }
 
-const generatedPermissions: StaticPermissions = Object.fromEntries(
-  permissionsList.map((PermissionName: PermissionName) => [
-    PermissionName,
-    ({ session }) => !!session?.data.role?.[PermissionName],
-  ])
-) as StaticPermissions;
+export const accessControls = new AccessControls();
 
-// Permissions check - someone meets a criteria - yes or no
-// You can add extra permissions too along with generated permissions
-export const permissions: StaticPermissions = {
-  ...generatedPermissions,
-};
+// //###########################################################
+// //##############    WES BOS        ##########################
+// //###########################################################
+// //###########################################################
+
+// export function isSignedIn({ session }: ListAccessArgs) {
+//   return !!session;
+// }
+
+// const _generatedStaticPermissionRules: GeneratedPermissions =
+//   Object.fromEntries(
+//     permissionsList.map((PermissionName: PermissionName) => [
+//       PermissionName,
+//       ({ session }) => !!session?.data.role?.[PermissionName],
+//     ])
+//   ) as GeneratedPermissions;
+
+// // Permissions check - someone meets a criteria - yes or no
+// export const staticPermissionsRules = {
+//   ..._generatedStaticPermissionRules,
+//   //you can add more own static-permission-rules here
+// };
 
 // // Rule based function
-// export const rules: ImperativePermissions = {
+// export const ImperativePermissionRules = {
 //   canManageProducts({ session }: ListAccessArgs) {
 //     // 1. Do they have persmission of canManageProducts
-//     if (permissions.canManageProducts({ session })) {
+//     if (staticPermissionsRules.canManageProducts({ session })) {
 //       return true;
 //     }
 //     // 2. If not, do they own this item?
 //     return { user: { id: session?.itemId } };
+//   },
+//   canReadProducts({ session }: ListAccessArgs) {
+//     if (staticPermissionsRules.canManageProducts({ session })) return true;
+//     return { status: "AVAILABLE" };
 //   },
 // };
