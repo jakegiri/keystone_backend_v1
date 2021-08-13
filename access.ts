@@ -64,18 +64,18 @@ class AccessControls {
       if (this.staticPermissionsRules.canManageProducts({ session })) {
         return true;
       }
-      //2. If not, do they own the related order of this orderItem?
+      //2. If not, do they own this?
       return { order: { user: { id: session?.itemId } } };
     },
     canReadProducts: ({ session }: ListAccessArgs) => {
       if (!this.isSignedIn({ session })) {
         return false;
       }
-      //1. Do they have persmission of canManageProducts
+      //1. Do they have persmission of canManageProducts (they can read everything)
       if (this.staticPermissionsRules.canManageProducts({ session })) {
         return true;
       }
-      //2. If not, do they own this item?
+      //2. They should only see available products (based on status field)
       return { status: "AVAILABLE" };
     },
   };
