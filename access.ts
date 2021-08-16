@@ -68,9 +68,9 @@ class AccessControls {
       return { order: { user: { id: session?.itemId } } };
     },
     canReadProducts: ({ session }: ListAccessArgs) => {
-      if (!this.isSignedIn({ session })) {
-        return false;
-      }
+      // if (!this.isSignedIn({ session })) {
+      //   return false;
+      // }
       //1. Do they have persmission of canManageProducts (they can read everything)
       if (this.staticPermissionsRules.canManageProducts({ session })) {
         return true;
