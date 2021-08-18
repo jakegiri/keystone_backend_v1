@@ -78,6 +78,28 @@ class AccessControls {
       //2. They should only see available products (based on status field)
       return { status: "AVAILABLE" };
     },
+    canManageUsers: ({ session }: ListAccessArgs) => {
+      if (!this.isSignedIn({ session })) {
+        return false;
+      }
+      //1. Do they have permission of canManageUsers?
+      if (this.staticPermissionsRules.canManageUsers({ session })) {
+        return true;
+      }
+      //. If not, do they own this item?
+      return { id: session?.itemId };
+    },
+    canReadRoles: ({ session }: ListAccessArgs) => {
+      if (!this.isSignedIn({ session })) {
+        return false;
+      }
+      // Do they have permission to manageRoles?
+      if (this.staticPermissionsRules.canManageRoles({ session })) {
+        return true;
+      }
+      // If not, do they own this item?
+      return { assignedTo: { id: session?.itemId } };
+    },
   };
 }
 

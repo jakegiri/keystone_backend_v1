@@ -13,7 +13,17 @@ import { accessControls } from "./access";
 
 export const lists = createSchema({
   User: list({
+    access: {
+      create: () => true,
+      read: accessControls.ImperativePermissionRules.canManageUsers,
+      update: accessControls.ImperativePermissionRules.canManageUsers,
+      delete: accessControls.staticPermissionsRules.canManageUsers,
+    },
     ui: {
+      hideCreate: ({ session }) =>
+        !accessControls.staticPermissionsRules.canManageUsers({ session }),
+      hideDelete: ({ session }) =>
+        !accessControls.staticPermissionsRules.canManageUsers({ session }),
       listView: {
         initialColumns: ["name", "email", "cart"],
       },
@@ -31,7 +41,13 @@ export const lists = createSchema({
         },
       }),
       orders: relationship({ ref: "Order.user", many: true }),
-      role: relationship({ ref: "Role.assignedTo" }),
+      role: relationship({
+        access: {
+          create: accessControls.staticPermissionsRules.canManageUsers,
+          update: accessControls.staticPermissionsRules.canManageUsers,
+        },
+        ref: "Role.assignedTo",
+      }),
       products: relationship({
         ref: "Product.user",
         many: true,
@@ -177,9 +193,9 @@ export const lists = createSchema({
   Role: list({
     access: {
       create: accessControls.staticPermissionsRules.canManageRoles,
-      read: accessControls.ImperativePermissionRules.canManageProducts,
-      update: accessControls.ImperativePermissionRules.canManageProducts,
-      delete: accessControls.ImperativePermissionRules.canManageProducts,
+      read: accessControls.ImperativePermissionRules.canReadRoles,
+      update: accessControls.staticPermissionsRules.canManageRoles,
+      delete: accessControls.staticPermissionsRules.canManageRoles,
     },
     ui: {
       isHidden: ({ session }) =>
