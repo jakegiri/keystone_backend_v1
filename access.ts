@@ -98,7 +98,7 @@ class AccessControls {
         return true;
       }
       // If not, do they own this item?
-      return { assignedTo: { id: session?.itemId } };
+      return { assignedTo: { some: { id: session?.itemId } } };
     },
   };
 }
@@ -106,7 +106,7 @@ class AccessControls {
 export const accessControls = new AccessControls();
 
 // //###########################################################
-// //##############    WES BOS        ##########################
+// //#############        WES BOS        #######################
 // //###########################################################
 // //###########################################################
 
